@@ -60,7 +60,7 @@ class QTable:
         return max(vals, key=vals.get)
 
     def q_values(self, state):
-        return {a: round(self.get(state, a), 3) for a in ACTIONS}
+        return {a: round(float(self.get(state, a)), 3) for a in ACTIONS}
 
     def size(self):
         return len(self.table)
@@ -73,21 +73,26 @@ def compute_state(close_arr):
     if len(close_arr) < 31:
         return (0, 1, 0)
 
-    sma10 = np.mean(close_arr[-10:])
-    sma30 = np.mean(close_arr[-30:])
+    close_arr = np.array(close_arr, dtype=float).flatten()
+
+    sma10 = float(np.mean(close_arr[-10:]))
+    sma30 = float(np.mean(close_arr[-30:]))
+
+    if sma10 == 0 or sma30 == 0 or np.isnan(sma10) or np.isnan(sma30):
+        return (0, 1, 0)
 
     diffs = np.diff(close_arr[-15:])
     gains = np.where(diffs > 0, diffs, 0)
     losses = np.where(diffs < 0, -diffs, 0)
-    ag = np.mean(gains) if np.mean(gains) > 0 else 1e-10
-    al = np.mean(losses) if np.mean(losses) > 0 else 1e-10
+    ag = float(np.mean(gains)) if float(np.mean(gains)) > 0 else 1e-10
+    al = float(np.mean(losses)) if float(np.mean(losses)) > 0 else 1e-10
     rsi = 100 - (100 / (1 + ag / al))
 
     trend    = 1 if sma10 > sma30 * 1.0002 else (-1 if sma10 < sma30 * 0.9998 else 0)
     rsi_zone = 2 if rsi > 70 else (0 if rsi < 30 else 1)
-    move     = 1 if close_arr[-1] > close_arr[-2] else -1
+    move     = 1 if float(close_arr[-1]) > float(close_arr[-2]) else -1
 
-    return (trend, rsi_zone, move)
+    return (int(trend), int(rsi_zone), int(move))
 
 
 # ============================================================
