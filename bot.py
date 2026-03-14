@@ -39,7 +39,7 @@ def get_close(df):
         except Exception:
             close = df.iloc[:, 0].values.flatten()
     else:
-        close = df["Close"].values.flatten()
+       df["Close"].squeeze().values
     return np.array(close, dtype=np.float64)
 
 
